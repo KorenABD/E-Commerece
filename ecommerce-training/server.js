@@ -13,7 +13,7 @@ const prisma = new PrismaClient();
 const PORT = process.env.PORT || 4000;
 const JWT_SECRET = process.env.JWT_SECRET;
 
-app.use(cors({ origin: ['http://127.0.0.1:5173','http://localhost:5173'], credentials: true }));
+app.use(cors({ origin: ['http://localhost:5173','http://localhost:5173'], credentials: true }));
 app.use(express.json());
 
 app.get('/health', (req, res) => res.json({ ok: true }));
