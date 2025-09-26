@@ -136,6 +136,19 @@ app.post('/me/checkout', auth, async (req, res) => {
   res.json(order);
 });
 
+// --- Orders ---
+app.get('/me/orders', auth, async (req, res) => {
+  const orders = await prisma.order.findMany({
+    where: { userId: req.user.sub },
+    include: {
+      items: { include: { product: true } }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+  res.json(orders);
+});
+
+
 app.listen(PORT, () => {
   console.log(`API running on http://127.0.0.1:${PORT}`);
 });
