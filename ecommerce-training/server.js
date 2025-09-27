@@ -156,20 +156,44 @@ app.get('/me/cart', auth, async (req, res) => {
 });
 
 app.post('/me/cart', auth, async (req, res) => {
-  const schema = z.object({ productId: z.number().int(), quantity: z.number().int().min(1) });
+  const schema = z.object({
+    productId: z.number().int(),
+    quantity: z.number().int().min(1),
+  });
+
   const parse = schema.safeParse(req.body);
-  if (!parse.success) return res.status(400).json({ error: parse.error.errors });
+  if (!parse.success) {
+    return res.status(400).json({ error: parse.error.errors });
+  }
   const { productId, quantity } = parse.data;
 
   try {
+    const product = await prisma.product.findUnique({ where: { id: productId } });
+    if (!product) return res.status(404).json({ error: "Product not found" });
+
+    // 🟢 Stock check
+    const existing = await prisma.cartItem.findUnique({
+      where: { userId_productId: { userId: req.user.sub, productId } }
+    });
+    const newQty = (existing?.quantity || 0) + quantity;
+
+    if (newQty > product.inStock) {
+      return res.status(400).json({ error: `Only ${product.inStock} left in stock` });
+    }
+
     const upserted = await prisma.cartItem.upsert({
       where: { userId_productId: { userId: req.user.sub, productId } },
-      update: { quantity: { increment: quantity } },
+      update: { quantity: newQty },
       create: { userId: req.user.sub, productId, quantity }
     });
+
     res.json(upserted);
-  } catch (e) { res.status(500).json({ error: 'Server error' }); }
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Server error" });
+  }
 });
+
 
 app.delete('/me/cart/:productId', auth, async (req, res) => {
   const productId = Number(req.params.productId);
@@ -185,26 +209,51 @@ app.post('/me/checkout', auth, async (req, res) => {
   });
   if (items.length === 0) return res.status(400).json({ error: 'Cart is empty' });
 
+  // ✅ Check stock first
+  for (const it of items) {
+    if (it.quantity > it.product.inStock) {
+      return res.status(400).json({ error: `Not enough stock for ${it.product.name}` });
+    }
+  }
+
   const total = items.reduce((sum, it) => sum + Number(it.product.price) * it.quantity, 0);
 
-  const order = await prisma.$transaction(async (tx) => {
-    const created = await tx.order.create({
-      data: { userId: req.user.sub, total, status: 'PENDING' }
-    });
-    await tx.orderItem.createMany({
-      data: items.map(it => ({
-        orderId: created.id,
-        productId: it.productId,
-        quantity: it.quantity,
-        unitPrice: it.product.price
-      }))
-    });
-    await tx.cartItem.deleteMany({ where: { userId: req.user.sub } });
-    return created;
-  });
+  try {
+    const order = await prisma.$transaction(async (tx) => {
+      const created = await tx.order.create({
+        data: { userId: req.user.sub, total, status: 'PENDING' }
+      });
 
-  res.json(order);
+      await tx.orderItem.createMany({
+        data: items.map(it => ({
+          orderId: created.id,
+          productId: it.productId,
+          quantity: it.quantity,
+          unitPrice: it.product.price
+        }))
+      });
+
+      // Decrement stock
+      for (const it of items) {
+        await tx.product.update({
+          where: { id: it.productId },
+          data: { inStock: { decrement: it.quantity } }
+        });
+      }
+
+      await tx.cartItem.deleteMany({ where: { userId: req.user.sub } });
+
+      return created;
+    });
+
+    res.json(order);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Checkout failed' });
+  }
 });
+
+
 
 // --- Orders ---
 app.get('/me/orders', auth, async (req, res) => {
