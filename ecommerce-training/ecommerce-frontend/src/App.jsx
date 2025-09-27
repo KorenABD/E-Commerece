@@ -3,6 +3,8 @@ import ProductsPage from "./pages/ProductsPage";
 import AuthPage from "./pages/AuthPage";
 import CartPage from "./pages/CartPage";
 import OrdersPage from "./pages/OrdersPage";
+import AdminDashboard from "./pages/AdminDashboard";
+
 
 
 
@@ -14,6 +16,7 @@ function App() {
         <Link to="/auth" style={{ marginRight: "1rem" }}>Login/Register</Link>
         <Link to="/cart" style={{ marginRight: "1rem" }}> Cart</Link>
         <Link to="/orders" style={{ marginRight: "1rem" }}>Orders</Link>
+        <Link to="/admin" style={{ marginRight: "1rem" }}>Admin</Link>
 
       </nav>
 
@@ -22,7 +25,7 @@ function App() {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/orders" element={<OrdersPage />} />
-
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </BrowserRouter>
   );

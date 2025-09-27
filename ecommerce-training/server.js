@@ -25,6 +25,76 @@ const credSchema = z.object({
   name: z.string().min(1).optional()
 });
 
+function requireAdmin(req, res, next) {
+  if (req.user.role !== "ADMIN") {
+    return res.status(403).json({ error: "Admins only" });
+  }
+  next();
+}
+
+// --- Admin: Manage Products ---
+app.post('/admin/products', auth, requireAdmin, async (req, res) => {
+  const { name, description, price, categoryId, inStock } = req.body;
+  try {
+    const product = await prisma.product.create({
+      data: { name, description, price, categoryId, inStock }
+    });
+    res.json(product);
+  } catch (e) {
+    res.status(400).json({ error: "Invalid product data" });
+  }
+});
+
+app.put('/admin/products/:id', auth, requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  const { name, description, price, categoryId, inStock } = req.body;
+  try {
+    const product = await prisma.product.update({
+      where: { id },
+      data: { name, description, price, categoryId, inStock }
+    });
+    res.json(product);
+  } catch {
+    res.status(404).json({ error: "Product not found" });
+  }
+});
+
+app.delete('/admin/products/:id', auth, requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  try {
+    await prisma.product.delete({ where: { id } });
+    res.json({ ok: true });
+  } catch {
+    res.status(404).json({ error: "Product not found" });
+  }
+});
+
+// --- Admin: View all orders ---
+app.get('/admin/orders', auth, requireAdmin, async (_req, res) => {
+  const orders = await prisma.order.findMany({
+    include: { items: { include: { product: true } }, user: true },
+    orderBy: { createdAt: 'desc' }
+  });
+  res.json(orders);
+});
+
+// --- Admin: Update order status ---
+app.put('/admin/orders/:id', auth, requireAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  const { status } = req.body;
+  try {
+    const order = await prisma.order.update({
+      where: { id },
+      data: { status }
+    });
+    res.json(order);
+  } catch {
+    res.status(404).json({ error: "Order not found" });
+  }
+});
+
+
+
 app.post('/auth/register', async (req, res) => {
   const parse = credSchema.safeParse(req.body);
   if (!parse.success) return res.status(400).json({ error: parse.error.errors });
