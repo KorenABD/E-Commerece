@@ -35,10 +35,10 @@ export default function AdminDashboard() {
     loadProducts();
   }
 
-  async function handleDeleteProduct(id) {
-    await deleteProduct(id);
-    loadProducts();
-  }
+//   async function handleDeleteProduct(id) {
+//     await deleteProduct(id);
+//     loadProducts();
+//   }
 
   async function handleUpdateOrder(id, status) {
     await updateOrderStatus(id, status);
@@ -64,7 +64,7 @@ export default function AdminDashboard() {
         {products.map(p => (
           <li key={p.id}>
             {p.name} — ${Number(p.price).toFixed(2)} ({p.inStock} in stock)
-            <button onClick={() => handleDeleteProduct(p.id)}>Delete</button>
+            {/* <button onClick={() => handleDeleteProduct(p.id)}>Delete</button> */}
           </li>
         ))}
       </ul>
