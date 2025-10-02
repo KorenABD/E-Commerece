@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import { addToCart } from "../services/cart";
+import Hero from "../components/Hero";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -11,18 +12,25 @@ export default function ProductsPage() {
       .catch(err => console.error(err));
   }, []);
 
-  async function handleAdd(productId) {
-    try {
-      await addToCart(productId);
-      alert("Added to cart!");
-    } catch {
+ async function handleAdd(productId) {
+  try {
+    await addToCart(productId);
+    alert("Added to cart!");
+  } catch (e) {
+    if (e.response?.data?.error) {
+      // 🟢 Show backend error message (like "Only 2 left in stock")
+      alert(e.response.data.error);
+    } else {
       alert("You need to login first!");
     }
   }
+}
 
   return (
     <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Products</h1>
+      <Hero /> {/* 🟢 New Hero at top */}
+
+      <h1 id="products" className="text-3xl font-bold mb-6">Products</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {products.map(p => (
           <div key={p.id} className="bg-white shadow rounded-lg p-4 flex flex-col">
