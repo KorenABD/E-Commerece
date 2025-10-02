@@ -35,10 +35,10 @@ export default function AdminDashboard() {
     loadProducts();
   }
 
-//   async function handleDeleteProduct(id) {
-//     await deleteProduct(id);
-//     loadProducts();
-//   }
+  async function handleDeleteProduct(id) {
+    await deleteProduct(id);
+    loadProducts();
+  }
 
   async function handleUpdateOrder(id, status) {
     await updateOrderStatus(id, status);
@@ -46,49 +46,62 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>Admin Dashboard</h1>
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
 
       {/* Product Management */}
-      <h2>Products</h2>
-      <form onSubmit={handleAddProduct}>
-        <input placeholder="Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
-        <input placeholder="Description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
-        <input placeholder="Price" type="number" step="0.01" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} required />
-        <input placeholder="Category ID" type="number" value={form.categoryId} onChange={e => setForm({ ...form, categoryId: e.target.value })} required />
-        <input placeholder="In Stock" type="number" value={form.inStock} onChange={e => setForm({ ...form, inStock: e.target.value })} required />
-        <button type="submit">Add Product</button>
-      </form>
+      <div className="bg-white shadow rounded-lg p-6 mb-8">
+        <h2 className="text-xl font-semibold mb-4">Manage Products</h2>
+        <form onSubmit={handleAddProduct} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+          <input className="border rounded px-3 py-2" placeholder="Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
+          <input className="border rounded px-3 py-2" placeholder="Description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+          <input className="border rounded px-3 py-2" type="number" step="0.01" placeholder="Price" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} required />
+          <input className="border rounded px-3 py-2" type="number" placeholder="Category ID" value={form.categoryId} onChange={e => setForm({ ...form, categoryId: e.target.value })} required />
+          <input className="border rounded px-3 py-2" type="number" placeholder="In Stock" value={form.inStock} onChange={e => setForm({ ...form, inStock: e.target.value })} required />
+          <button type="submit" className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 col-span-full sm:col-span-2 md:col-span-1">
+            Add Product
+          </button>
+        </form>
 
-      <ul>
-        {products.map(p => (
-          <li key={p.id}>
-            {p.name} — ${Number(p.price).toFixed(2)} ({p.inStock} in stock)
-            {/* <button onClick={() => handleDeleteProduct(p.id)}>Delete</button> */}
-          </li>
-        ))}
-      </ul>
+        <ul className="divide-y divide-gray-200">
+          {products.map(p => (
+            <li key={p.id} className="flex justify-between items-center py-3">
+              <span>{p.name} — ${Number(p.price).toFixed(2)} ({p.inStock} in stock)</span>
+              <button onClick={() => handleDeleteProduct(p.id)} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       {/* Order Management */}
-      <h2>Orders</h2>
-      {orders.map(order => (
-        <div key={order.id} style={{ border: "1px solid #ccc", margin: "1rem 0", padding: "1rem" }}>
-          <h3>Order #{order.id} — {order.status}</h3>
-          <p>User: {order.user.email}</p>
-          <p>Total: ${Number(order.total).toFixed(2)}</p>
-          <ul>
-            {order.items.map(item => (
-              <li key={item.id}>{item.product.name} × {item.quantity}</li>
-            ))}
-          </ul>
-          <select value={order.status} onChange={e => handleUpdateOrder(order.id, e.target.value)}>
-            <option value="PENDING">Pending</option>
-            <option value="PAID">Paid</option>
-            <option value="SHIPPED">Shipped</option>
-            <option value="CANCELLED">Cancelled</option>
-          </select>
-        </div>
-      ))}
+      <div className="bg-white shadow rounded-lg p-6">
+        <h2 className="text-xl font-semibold mb-4">Manage Orders</h2>
+        {orders.map(order => (
+          <div key={order.id} className="border rounded p-4 mb-4">
+            <h3 className="font-semibold">Order #{order.id}</h3>
+            <p className="text-sm text-gray-500">User: {order.user.email}</p>
+            <p>Status: {order.status}</p>
+            <p>Total: ${Number(order.total).toFixed(2)}</p>
+            <ul className="list-disc pl-6 mb-2">
+              {order.items.map(item => (
+                <li key={item.id}>
+                  {item.product.name} × {item.quantity}
+                </li>
+              ))}
+            </ul>
+            <select
+              value={order.status}
+              onChange={e => handleUpdateOrder(order.id, e.target.value)}
+              className="border rounded px-3 py-1"
+            >
+              <option value="PENDING">Pending</option>
+              <option value="PAID">Paid</option>
+              <option value="SHIPPED">Shipped</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

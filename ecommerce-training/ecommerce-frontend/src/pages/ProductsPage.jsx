@@ -12,36 +12,33 @@ export default function ProductsPage() {
   }, []);
 
   async function handleAdd(productId) {
-  try {
-    await addToCart(productId);
-    alert("✅ Added to cart!");
-  } catch (e) {
-    // Handle backend error
-    if (e.response && e.response.data && e.response.data.error) {
-      alert("❌ Unable to add to cart: " + e.response.data.error);
-    } else {
-      alert("❌ Unable to add to cart (login required or server error)");
+    try {
+      await addToCart(productId);
+      alert("Added to cart!");
+    } catch {
+      alert("You need to login first!");
     }
-    console.error(e);
   }
-}
-
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>Products</h1>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "1rem" }}>
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-6">Products</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {products.map(p => (
-          <div key={p.id} style={{ border: "1px solid #ddd", padding: "1rem", borderRadius: "8px" }}>
-            <h2>{p.name}</h2>
-            <p>{p.description}</p>
-            <strong>${Number(p.price).toFixed(2)}</strong>
-            <p><em>{p.category?.name}</em></p>
-            <p>Stock: {p.inStock}</p>
+          <div key={p.id} className="bg-white shadow rounded-lg p-4 flex flex-col">
+            <h2 className="text-xl font-semibold mb-2">{p.name}</h2>
+            <p className="text-gray-600 flex-1">{p.description}</p>
+            <p className="mt-2 text-lg font-bold">${Number(p.price).toFixed(2)}</p>
+            <p className="text-sm text-gray-500">Stock: {p.inStock}</p>
             {p.inStock > 0 ? (
-              <button onClick={() => handleAdd(p.id)}>Add to Cart</button>
+              <button
+                onClick={() => handleAdd(p.id)}
+                className="mt-2 bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+              >
+                Add to Cart
+              </button>
             ) : (
-              <span style={{ color: "red", fontWeight: "bold" }}>Out of stock</span>
+              <span className="mt-2 text-red-500 font-semibold">Out of stock</span>
             )}
           </div>
         ))}

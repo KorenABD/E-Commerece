@@ -29,20 +29,41 @@ export default function CartPage() {
   }
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>Your Cart</h1>
-      {items.length === 0 ? <p>No items yet.</p> : (
-        <ul>
-          {items.map(it => (
-            <li key={it.id}>
-              {it.product.name} (x{it.quantity}) - ${Number(it.product.price) * it.quantity}
-              <button onClick={() => handleRemove(it.productId)}>Remove</button>
-            </li>
-          ))}
-        </ul>
-      )}
-      {items.length > 0 && (
-        <button onClick={handleCheckout}>Checkout</button>
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-6">Your Cart</h1>
+
+      {items.length === 0 ? (
+        <p className="text-gray-500">No items in your cart.</p>
+      ) : (
+        <div className="bg-white shadow rounded-lg p-6">
+          <ul className="divide-y divide-gray-200">
+            {items.map(it => (
+              <li key={it.id} className="flex justify-between items-center py-3">
+                <div>
+                  <p className="font-medium">{it.product.name}</p>
+                  <p className="text-sm text-gray-500">
+                    {it.quantity} × ${Number(it.product.price).toFixed(2)}
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleRemove(it.productId)}
+                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-6 text-right">
+            <button
+              onClick={handleCheckout}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            >
+              Checkout
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
