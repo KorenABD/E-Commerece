@@ -5,6 +5,8 @@ import CartPage from "./pages/CartPage";
 import OrdersPage from "./pages/OrdersPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import { getCurrentUser, logout } from "./services/auth";
+import AdminRoute from "./components/AdminRoute";
+
 
 function Navbar() {
   const user = getCurrentUser();
@@ -46,7 +48,14 @@ function App() {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/orders" element={<OrdersPage />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
