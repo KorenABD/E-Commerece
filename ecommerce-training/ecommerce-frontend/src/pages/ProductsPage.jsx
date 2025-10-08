@@ -3,6 +3,7 @@ import api from "../services/api";
 import { addToCart } from "../services/cart";
 import Hero from "../components/Hero";
 
+
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
 
